@@ -1,0 +1,37 @@
+<svg width="512" height="260" viewBox="0 0 512 260" xmlns="http://www.w3.org/2000/svg">
+
+<defs>
+  <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#ff2ec4"/>
+    <stop offset="50%" stop-color="#b44bff"/>
+    <stop offset="100%" stop-color="#2ecbff"/>
+  </linearGradient>
+</defs>
+
+<!-- Headphone Circle -->
+<circle cx="150" cy="110" r="70"
+stroke="url(#grad)" stroke-width="10" fill="none"/>
+
+<!-- Headband -->
+<path d="M95 115 q0 -60 55 -60 q60 0 55 60"
+stroke="url(#grad)" stroke-width="14"
+fill="none" stroke-linecap="round"/>
+
+<!-- Left ear -->
+<rect x="70" y="105" width="22" height="55" rx="10" fill="url(#grad)"/>
+<!-- Right ear -->
+<rect x="208" y="105" width="22" height="55" rx="10" fill="url(#grad)"/>
+
+<!-- Play Button -->
+<polygon points="140,85 180,110 140,135" fill="url(#grad)"/>
+
+<!-- TEXT -->
+<text x="290" y="125"
+font-family="Poppins, Segoe UI, Arial"
+font-size="46"
+font-weight="700"
+fill="url(#grad)">
+VibeBox
+</text>
+
+</svg>

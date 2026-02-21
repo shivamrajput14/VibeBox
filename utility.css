@@ -1,0 +1,253 @@
+.flex{
+    display: flex;
+}
+.justify-center{
+    justify-content: center;
+}
+.align-center{
+    align-items: center;
+}
+.border{
+    border: 2px solid rgb(82, 8, 8);
+margin: 3px;}
+.bg-black{
+    background-color: black;
+    color: white;
+}
+
+.invert{
+    filter: invert(1);
+
+}
+.bg-grey{
+    background-color: #121212;
+}
+.rounded{
+    border-radius: 8px;
+}
+.m-1{
+    margin: 5px;
+}
+.p-1{
+    padding: 10px;
+}
+
+
+/* ---------- Albums grid & cards ---------- */
+.cardcontainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* desktop: many columns, responsive */
+  gap: auto;
+  align-items: start;
+  padding: 18px;
+}
+
+/* card box */
+.card {
+  position: relative;
+  background: #161616;           /* dark panel */
+  color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;             /* equal height for all cards */
+  box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+/* hover lift */
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+}
+
+/* cover image — fixed aspect (square) and will be cropped center */
+.card img {
+  width: 100%;
+  height: 220px;                 /* fixed crop height — change if you want taller */
+  object-fit: cover;             /* crop center and fill */
+  display: block;
+  background: linear-gradient(180deg,#222,#111);
+}
+
+/* content area below image */
+.card h2 {
+  font-family: 'Georgia', serif;
+  font-size: 1.15rem;
+  margin: 14px 16px 6px;
+  line-height: 1.1;
+  color: #f5f5f5;
+}
+
+.card p {
+  margin: 0 16px 16px;
+  font-size: 0.9rem;
+  color: #cfcfcf;
+  line-height: 1.3;
+  height: 3.2em;                  /* keep description box same height */
+  overflow: hidden;
+}
+
+/* small play button top-left (optional) */
+.card .play {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+}
+
+/* active card (when selected) */
+
+
+/* smaller screens */
+@media (max-width: 900px) {
+  .card img { height: 180px; }
+  .card { min-height: 320px; }
+}
+
+
+.card h2 {
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: ellipsis;
+    font-size: clamp(0.9rem, 1.2vw, 1.3rem);
+}
+
+
+
+
+
+
+.card p {
+  margin: auto;
+  font-size: 1rem;
+
+  line-height: 1.35;
+  color: #cfcfcf;
+
+  display: -webkit-box;           /* required for line-clamp */
+  -webkit-line-clamp: 3;          /* number of lines to show */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+
+
+
+/* ---------- Card layout: image + fixed content area ---------- */
+.cardcontainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 18px;
+  /* keep room for player fallback (JS will increase if needed) */
+  padding-bottom: 40px;
+}
+
+/* Card box */
+.card {
+  position: relative;
+  background: #171717;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;           /* equal card height */
+  box-shadow: 0 6px 18px rgba(0,0,0,0.55);
+}
+
+/* Cover image: fixed height, cropped */
+.card > img {
+  width: 100%;
+  height: 220px;               /* fixed cropped image area */
+  object-fit: cover;
+  display: block;
+  background: #1d1d1d;
+}
+
+/* content area below image; flex to fill remaining space */
+.card .content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex: 1 1 auto;              /* important - makes content occupy leftover space */
+  padding: 14px 16px 18px;
+  box-sizing: border-box;
+}
+
+/* Title */
+.card .content h2 {
+  margin: 0 0 10px;
+  font-family: 'Georgia', serif;
+  font-size: 1.12rem;
+  line-height: 1.05;
+  color: #f5f5f5;
+  white-space: nowrap;         /* keep title on one line */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Description: clamp to 3 lines and hide overflow */
+.card .content p {
+  margin: 0;
+  color: #cfcfcf;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;       /* <--- shows max 3 lines */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* small responsive tweaks */
+@media (max-width: 900px) {
+  .card { min-height: 320px; }
+  .card > img { height: 180px; }
+}
+
+/* make sure active highlight doesn't change size/layout */
+.card.active { outline: 1px solid #95919f; }
+
+/* small fallback in case JS doesn't run */
+.player { z-index: 9999; }
+
+
+
+
+
+.applogo{
+  width: 160px;
+  height: auto;
+}
+
+
+.logo img,
+.logo svg{
+  width: 150px;
+  height: auto;
+}
+
+
+
+.searchPanel{
+  max-height:0;
+  overflow:hidden;
+  opacity:0;
+  transform: translateY(-10px);
+  transition: 
+     max-height .35s ease,
+     opacity .25s ease,
+     transform .25s ease;
+}
+
+/* When visible */
+.searchPanel.show{
+  max-height:300px;    /* enough height to show results */
+  opacity:1;
+  transform: translateY(0);
+}
+
+
