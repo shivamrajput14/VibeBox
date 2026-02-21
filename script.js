@@ -259,6 +259,11 @@ prevBtn.addEventListener("click", () => {
 const seekbar = document.querySelector(".seekbar");
 const circle = document.querySelector(".circle");
 
+// Inject the gradient fill div inside seekbar
+const seekFill = document.createElement("div");
+seekFill.className = "seekbar-fill";
+seekbar.insertBefore(seekFill, circle);
+
 seekbar.addEventListener("click", e => {
   if (!currentSong.duration) return;
   const rect = seekbar.getBoundingClientRect();
@@ -274,7 +279,9 @@ currentSong.addEventListener("timeupdate", () => {
     `${formatTime(cur)} / ${formatTime(dur)}`;
 
   if (dur) {
-    circle.style.left = `${(cur / dur) * 100}%`;
+    const pct = (cur / dur) * 100;
+    circle.style.left = `${pct}%`;
+    seekFill.style.width = `${pct}%`;   // grow the gradient fill
   }
 });
 
