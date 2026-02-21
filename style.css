@@ -126,15 +126,26 @@ html, body {
    MOBILE SONGLIST VIEW — glassmorphism
    ============================================================ */
 .mobile-songlist {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  background: rgba(6, 7, 18, 0.65);       /* dark transparent base */
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.08);
-  overflow-y: auto;
-  padding: 16px 12px 100px;               /* bottom pad for playbar */
+  display: none !important;                  /* completely hidden on desktop always */
+}
+
+/* Only activate on mobile/tablet screens */
+@media (max-width: 900px) {
+  .mobile-songlist {
+    display: none;                           /* still hidden until show-songs */
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(6, 7, 18, 0.95);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    overflow-y: auto;
+    padding: 80px 16px 120px;
+  }
+
+  .right.show-songs .mobile-songlist {
+    display: block !important;               /* show ONLY when album clicked on mobile */
+  }
 }
 
 .mobile-songlist ul {
