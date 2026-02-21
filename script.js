@@ -26,10 +26,21 @@ function formatTime(time) {
 
 /* ================= LOAD ALBUMS ================= */
 async function loadAlbums() {
+  const container = document.querySelector(".cardcontainer");
+
+  // Show 6 skeleton cards while loading
+  container.innerHTML = Array(6).fill(`
+    <div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-title"></div>
+      <div class="skeleton-sub"></div>
+      <div class="skeleton-sub" style="width:60%;margin-top:4px"></div>
+    </div>
+  `).join("");
+
   const res = await fetch("songs-data.json");
   albumsIndex = await res.json();
 
-  const container = document.querySelector(".cardcontainer");
   container.innerHTML = "";
   allSongs = [];
 
@@ -78,6 +89,7 @@ function loadSongs(folder, info) {
   const desktopUL = document.querySelector(".songlist ul");
   const mobileUL = document.querySelector(".mobile-songlist ul");
   const mobileSonglist = document.querySelector(".mobile-songlist");
+  const cardcontainer = document.querySelector(".cardcontainer");
 
   desktopUL.innerHTML = "";
   mobileUL.innerHTML = "";
@@ -91,6 +103,7 @@ function loadSongs(folder, info) {
   backBtn.innerHTML = `<span class="back-arrow"></span> Back`;
   backBtn.addEventListener("click", () => {
     document.querySelector(".right").classList.remove("show-songs");
+    cardcontainer.classList.remove("fade-out");
   });
   mobileSonglist.insertBefore(backBtn, mobileUL);
 
@@ -122,7 +135,13 @@ function loadSongs(folder, info) {
   updateSongInfo(0);
 
   if (window.innerWidth <= 900) {
-    document.querySelector(".right").classList.add("show-songs");
+    // Smooth transition: fade out cards, slide in song list
+    cardcontainer.classList.add("fade-out");
+    setTimeout(() => {
+      document.querySelector(".right").classList.add("show-songs");
+      mobileSonglist.classList.add("slide-in");
+      setTimeout(() => mobileSonglist.classList.remove("slide-in"), 400);
+    }, 300);
   }
 }
 
@@ -150,8 +169,57 @@ function playSong(index) {
   document.querySelector(".songinfo").textContent =
     `${song.name} - ${song.artist}`;
 
+  // Update album art thumbnail in playbar
+  let thumb = document.querySelector(".playbar-thumb");
+  if (!thumb) {
+    thumb = document.createElement("img");
+    thumb.className = "playbar-thumb";
+    thumb.alt = "album art";
+    const songinfo = document.querySelector(".songinfo");
+    songinfo.parentNode.insertBefore(thumb, songinfo);
+  }
+
+  // Try to find cover from albumsIndex
+  const albumKey = Object.keys(albumsIndex).find(k => albumsIndex[k].path === currentAlbum);
+  if (albumKey) {
+    fetch(`${S3_BASE}/${currentAlbum}/info.json`)
+      .then(r => r.json())
+      .then(info => {
+        thumb.src = `${S3_BASE}/${currentAlbum}/${info.cover}`;
+        thumb.onerror = () => { thumb.src = "default-cover.jpg"; };
+      }).catch(() => { thumb.src = "default-cover.jpg"; });
+  }
+
+  // Update now playing indicator in both song lists
+  ["songlist ul li", ".mobile-songlist ul li"].forEach(selector => {
+    document.querySelectorAll(selector).forEach((li, i) => {
+      li.classList.remove("active-song");
+
+      // Replace icon with bouncing bars or restore music note
+      const icon = li.querySelector("img.invert");
+      const existingBars = li.querySelector(".now-playing-bars");
+
+      if (i === index) {
+        li.classList.add("active-song");
+        if (icon) icon.style.display = "none";
+        if (!existingBars) {
+          const bars = document.createElement("div");
+          bars.className = "now-playing-bars";
+          bars.innerHTML = `<span></span><span></span><span></span><span></span>`;
+          li.insertBefore(bars, li.firstChild);
+        }
+      } else {
+        if (icon) icon.style.display = "";
+        if (existingBars) existingBars.remove();
+      }
+    });
+  });
+
   currentSong.play().then(() => {
     playBtn.src = "pause.svg";
+    // Spin album thumb when playing
+    const t = document.querySelector(".playbar-thumb");
+    if (t) t.classList.add("playing");
   }).catch(err => {
     if (err.name !== "AbortError") console.error(err);
   });
@@ -164,13 +232,16 @@ const prevBtn = document.getElementById("prev");
 
 playBtn.addEventListener("click", () => {
   if (!songs.length) return;
+  const thumb = document.querySelector(".playbar-thumb");
 
   if (currentSong.paused) {
     currentSong.play();
     playBtn.src = "pause.svg";
+    if (thumb) thumb.classList.add("playing");
   } else {
     currentSong.pause();
     playBtn.src = "play.svg";
+    if (thumb) thumb.classList.remove("playing");
   }
 });
 
