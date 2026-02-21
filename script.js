@@ -9,9 +9,12 @@ let allSongs = [];
 let songs = [];
 let currentAlbum = null;
 let currentIndex = 0;
+let isMuted = false;
+let lastVolume = 0.8; // remember volume before mute
 
 const currentSong = new Audio();
 currentSong.preload = "metadata";
+currentSong.volume = lastVolume;
 
 /* ================= UTILS ================= */
 function formatTime(time) {
@@ -43,7 +46,6 @@ async function loadAlbums() {
       continue;
     }
 
-    /* build global search index */
     info.songs.forEach(song => {
       allSongs.push({
         name: song.name,
@@ -65,8 +67,6 @@ async function loadAlbums() {
     card.addEventListener("click", () => loadSongs(folder, info));
     container.appendChild(card);
   }
-
-  console.log("Search index ready:", allSongs.length);
 }
 
 /* ================= LOAD SONG LIST ================= */
@@ -75,28 +75,68 @@ function loadSongs(folder, info) {
   songs = info.songs;
   currentIndex = 0;
 
-  const ul = document.querySelector(".songlist ul");
-  ul.innerHTML = "";
+  const desktopUL = document.querySelector(".songlist ul");
+  const mobileUL = document.querySelector(".mobile-songlist ul");
+  const mobileSonglist = document.querySelector(".mobile-songlist");
+
+  desktopUL.innerHTML = "";
+  mobileUL.innerHTML = "";
+
+  // Inject back button at top of mobile songlist (remove old one first)
+  const oldBack = mobileSonglist.querySelector(".mobile-back-btn");
+  if (oldBack) oldBack.remove();
+
+  const backBtn = document.createElement("button");
+  backBtn.className = "mobile-back-btn";
+  backBtn.innerHTML = `<span class="back-arrow"></span> Back`;
+  backBtn.addEventListener("click", () => {
+    document.querySelector(".right").classList.remove("show-songs");
+  });
+  mobileSonglist.insertBefore(backBtn, mobileUL);
 
   songs.forEach((song, i) => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <img class="invert" src="music.svg">
-      <div class="info">
-        <div>${song.name}</div>
-        <div>${song.artist}</div>
-      </div>
-      <div class="playnow"><span>Play Now</span></div>
+    const html = `
+      <li>
+        <img class="invert" src="music.svg">
+        <div class="info">
+          <div>${song.name}</div>
+          <div>${song.artist}</div>
+        </div>
+        <div class="playnow"><span>Play</span></div>
+      </li>
     `;
-    li.addEventListener("click", () => playSong(i));
-    ul.appendChild(li);
+
+    // Desktop
+    const liDesktop = document.createElement("div");
+    liDesktop.innerHTML = html;
+    liDesktop.firstElementChild.addEventListener("click", () => playSong(i));
+    desktopUL.appendChild(liDesktop.firstElementChild);
+
+    // Mobile
+    const liMobile = document.createElement("div");
+    liMobile.innerHTML = html;
+    liMobile.firstElementChild.addEventListener("click", () => playSong(i));
+    mobileUL.appendChild(liMobile.firstElementChild);
   });
 
-  playSong(0, false);
+  updateSongInfo(0);
+
+  if (window.innerWidth <= 900) {
+    document.querySelector(".right").classList.add("show-songs");
+  }
+}
+
+/* ================= UPDATE INFO ONLY ================= */
+function updateSongInfo(index) {
+  if (!songs[index]) return;
+  const song = songs[index];
+  document.querySelector(".songinfo").textContent =
+    `${song.name} - ${song.artist}`;
+  playBtn.src = "play.svg";
 }
 
 /* ================= PLAY SONG ================= */
-function playSong(index, autoplay = true) {
+function playSong(index) {
   if (!songs[index]) return;
 
   currentIndex = index;
@@ -107,20 +147,14 @@ function playSong(index, autoplay = true) {
   currentSong.src = `${S3_BASE}/${currentAlbum}/${encodedFile}`;
   currentSong.currentTime = 0;
 
-  document.querySelector(".songinfo").textContent = "Loading…";
-  playBtn.src = "play.svg";
+  document.querySelector(".songinfo").textContent =
+    `${song.name} - ${song.artist}`;
 
-  if (!autoplay) return;
-
-  currentSong.oncanplay = () => {
-    currentSong.play().catch(err => {
-      if (err.name !== "AbortError") console.error(err);
-    });
-
-    document.querySelector(".songinfo").textContent =
-      `${song.name} - ${song.artist}`;
+  currentSong.play().then(() => {
     playBtn.src = "pause.svg";
-  };
+  }).catch(err => {
+    if (err.name !== "AbortError") console.error(err);
+  });
 }
 
 /* ================= CONTROLS ================= */
@@ -129,6 +163,8 @@ const nextBtn = document.getElementById("next");
 const prevBtn = document.getElementById("prev");
 
 playBtn.addEventListener("click", () => {
+  if (!songs.length) return;
+
   if (currentSong.paused) {
     currentSong.play();
     playBtn.src = "pause.svg";
@@ -168,6 +204,53 @@ currentSong.addEventListener("timeupdate", () => {
 
   if (dur) {
     circle.style.left = `${(cur / dur) * 100}%`;
+  }
+});
+
+/* ================= VOLUME CONTROL ================= */
+const volumeIcon = document.querySelector(".volume img");
+const volumeSlider = document.querySelector(".volume input[type='range']");
+
+// Set slider initial state
+volumeSlider.min = 0;
+volumeSlider.max = 1;
+volumeSlider.step = 0.01;
+volumeSlider.value = lastVolume;
+
+// Slider → change audio volume
+volumeSlider.addEventListener("input", () => {
+  const val = parseFloat(volumeSlider.value);
+  currentSong.volume = val;
+  lastVolume = val > 0 ? val : lastVolume; // don't overwrite lastVolume with 0
+
+  // sync mute state with slider
+  if (val === 0) {
+    isMuted = true;
+    currentSong.muted = true;
+    volumeIcon.src = "mute.svg";
+  } else {
+    isMuted = false;
+    currentSong.muted = false;
+    volumeIcon.src = "volume.svg";
+  }
+});
+
+// Volume icon click → toggle mute/unmute
+volumeIcon.addEventListener("click", () => {
+  if (isMuted) {
+    // Unmute
+    isMuted = false;
+    currentSong.muted = false;
+    currentSong.volume = lastVolume || 0.8;
+    volumeSlider.value = currentSong.volume;
+    volumeIcon.src = "volume.svg";
+  } else {
+    // Mute
+    isMuted = true;
+    lastVolume = currentSong.volume; // save current before muting
+    currentSong.muted = true;
+    volumeSlider.value = 0;
+    volumeIcon.src = "mute.svg";
   }
 });
 
@@ -214,24 +297,23 @@ searchBox.addEventListener("input", async () => {
 });
 
 /* ================= SEARCH PANEL TOGGLE ================= */
-
 const openSearchBtn = document.getElementById("openSearch");
 const closeSearchBtn = document.getElementById("closeSearch");
 const searchPanel = document.getElementById("leftSearchBox");
 const overlay = document.getElementById("overlay");
 
-if (openSearchBtn && searchPanel) {
+if (openSearchBtn) {
   openSearchBtn.addEventListener("click", () => {
     searchPanel.classList.add("show");
-    if (overlay) overlay.classList.add("show");
+    overlay.classList.add("show");
     searchBox.focus();
   });
 }
 
-if (closeSearchBtn && searchPanel) {
+if (closeSearchBtn) {
   closeSearchBtn.addEventListener("click", () => {
     searchPanel.classList.remove("show");
-    if (overlay) overlay.classList.remove("show");
+    overlay.classList.remove("show");
   });
 }
 
@@ -242,7 +324,14 @@ if (overlay) {
   });
 }
 
+/* ================= BACK BUTTON ================= */
+const backBtn = document.getElementById("backToAlbums");
 
+if (backBtn) {
+  backBtn.addEventListener("click", () => {
+    document.querySelector(".right").classList.remove("show-songs");
+  });
+}
 
 /* ================= INIT ================= */
 loadAlbums();
