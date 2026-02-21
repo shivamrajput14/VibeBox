@@ -269,7 +269,13 @@ searchBox.addEventListener("input", async () => {
   );
 
   if (!matches.length) {
-    searchResults.innerHTML = "<li>No results found</li>";
+    searchResults.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🎵</div>
+        <div class="empty-title">No songs found</div>
+        <div class="empty-sub">Try a different song or artist name</div>
+      </div>
+    `;
     return;
   }
 
@@ -334,4 +340,66 @@ if (backBtn) {
 }
 
 /* ================= INIT ================= */
+playBtn.src = "play.svg";   // always start as play icon on load
 loadAlbums();
+
+/* ================= SWIPE GESTURES (MOBILE) ================= */
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener("touchstart", e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener("touchend", e => {
+  if (!songs.length) return;
+
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+
+  // Only trigger if horizontal swipe is dominant and long enough
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+    if (dx < 0) {
+      // Swipe LEFT → next song
+      playSong((currentIndex + 1) % songs.length);
+      showSwipeFeedback("⏭ Next");
+    } else {
+      // Swipe RIGHT → previous song
+      playSong((currentIndex - 1 + songs.length) % songs.length);
+      showSwipeFeedback("⏮ Prev");
+    }
+  }
+}, { passive: true });
+
+function showSwipeFeedback(label) {
+  const old = document.getElementById("swipe-toast");
+  if (old) old.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "swipe-toast";
+  toast.textContent = label;
+  toast.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(124, 63, 255, 0.85);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    z-index: 99999;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+    box-shadow: 0 4px 20px rgba(124,63,255,0.5);
+  `;
+  document.body.appendChild(toast);
+
+  setTimeout(() => { toast.style.opacity = "0"; }, 800);
+  setTimeout(() => { toast.remove(); }, 1200);
+}
