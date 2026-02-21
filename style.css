@@ -1175,20 +1175,18 @@ button,
    DEVELOPED BY FOOTER
    ============================================================ */
 body::after {
-  content: 'Developed by @shivam';
+  content: 'Developed by @Shivam';
   position: fixed;
-  bottom: 10px;
-  left: 16px;
+  bottom: 88px;                             /* sits just above the playbar */
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 11px;
   font-weight: 500;
-  color: rgba(160, 140, 255, 0.45);
-  letter-spacing: 0.5px;
+  color: rgba(160, 140, 255, 0.35);
+  letter-spacing: 1px;
   font-family: 'SF Pro Display', -apple-system, sans-serif;
   pointer-events: none;
   z-index: 9998;
-  transition: color 0.3s ease;
-}
-
-body:hover::after {
-  color: rgba(192, 132, 252, 0.7);
+  white-space: nowrap;
+  text-transform: uppercase;
 }
