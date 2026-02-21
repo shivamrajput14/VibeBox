@@ -1175,7 +1175,7 @@ button,
    DEVELOPED BY FOOTER
    ============================================================ */
 body::after {
-  content: 'Developed by @Shivam';
+  content: 'Developed by @shivam';
   position: fixed;
   bottom: 88px;                             /* sits just above the playbar */
   left: 50%;
