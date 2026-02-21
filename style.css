@@ -675,10 +675,7 @@ button,
 }
 
 .close {
-  display: none;
-  position: absolute;
-  top: 25px;
-  right: 30px;
+  display: none !important;
 }
 
 .hamburger { display: none; }
@@ -1197,28 +1194,27 @@ button,
    CUSTOM SCROLLBAR
    ============================================================ */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.03);
-  border-radius: 10px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #7c3fff, #c084fc);
+  background: rgba(124, 63, 255, 0.3);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #9b5fff, #d4a0ff);
+  background: rgba(192, 132, 252, 0.5);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #7c3fff rgba(255,255,255,0.03);
+  scrollbar-color: rgba(124,63,255,0.3) transparent;
 }
 
 /* ============================================================
