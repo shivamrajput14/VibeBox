@@ -1170,3 +1170,25 @@ button,
   .timevol { display: flex; max-width: 200px; }
   .volume input[type="range"] { width: 90px; }
 }
+
+/* ============================================================
+   DEVELOPED BY FOOTER
+   ============================================================ */
+body::after {
+  content: 'Developed by @shivam';
+  position: fixed;
+  bottom: 10px;
+  left: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(160, 140, 255, 0.45);
+  letter-spacing: 0.5px;
+  font-family: 'SF Pro Display', -apple-system, sans-serif;
+  pointer-events: none;
+  z-index: 9998;
+  transition: color 0.3s ease;
+}
+
+body:hover::after {
+  color: rgba(192, 132, 252, 0.7);
+}
