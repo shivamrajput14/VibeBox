@@ -10,7 +10,7 @@ let songs = [];
 let currentAlbum = null;
 let currentIndex = 0;
 let isMuted = false;
-let lastVolume = 0.8; // remember volume before mute
+let lastVolume = 0.8;
 
 const currentSong = new Audio();
 currentSong.preload = "metadata";
@@ -22,6 +22,17 @@ function formatTime(time) {
   const m = Math.floor(time / 60);
   const s = Math.floor(time % 60);
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
+/* ================= IDLE HELPERS ================= */
+const playbar = document.querySelector(".playbar");
+
+function setIdle() {
+  playbar.classList.add("idle");
+}
+
+function setActive() {
+  playbar.classList.remove("idle");
 }
 
 /* ================= LOAD ALBUMS ================= */
@@ -82,7 +93,6 @@ function loadSongs(folder, info) {
   desktopUL.innerHTML = "";
   mobileUL.innerHTML = "";
 
-  // Inject back button at top of mobile songlist (remove old one first)
   const oldBack = mobileSonglist.querySelector(".mobile-back-btn");
   if (oldBack) oldBack.remove();
 
@@ -106,13 +116,11 @@ function loadSongs(folder, info) {
       </li>
     `;
 
-    // Desktop
     const liDesktop = document.createElement("div");
     liDesktop.innerHTML = html;
     liDesktop.firstElementChild.addEventListener("click", () => playSong(i));
     desktopUL.appendChild(liDesktop.firstElementChild);
 
-    // Mobile
     const liMobile = document.createElement("div");
     liMobile.innerHTML = html;
     liMobile.firstElementChild.addEventListener("click", () => playSong(i));
@@ -152,6 +160,7 @@ function playSong(index) {
 
   currentSong.play().then(() => {
     playBtn.src = "pause.svg";
+    setActive(); // ← remove idle state when song starts
   }).catch(err => {
     if (err.name !== "AbortError") console.error(err);
   });
@@ -168,9 +177,11 @@ playBtn.addEventListener("click", () => {
   if (currentSong.paused) {
     currentSong.play();
     playBtn.src = "pause.svg";
+    setActive(); // ← remove idle when resuming
   } else {
     currentSong.pause();
     playBtn.src = "play.svg";
+    // NOTE: we keep setActive() here — paused still shows real controls
   }
 });
 
@@ -182,6 +193,19 @@ nextBtn.addEventListener("click", () => {
 prevBtn.addEventListener("click", () => {
   if (!songs.length) return;
   playSong((currentIndex - 1 + songs.length) % songs.length);
+});
+
+/* When a song ends, auto-play next */
+currentSong.addEventListener("ended", () => {
+  if (!songs.length) return;
+  const nextIndex = (currentIndex + 1) % songs.length;
+  if (nextIndex === 0 && currentIndex === songs.length - 1) {
+    // Last song finished, go idle
+    setIdle();
+    playBtn.src = "play.svg";
+  } else {
+    playSong(nextIndex);
+  }
 });
 
 /* ================= SEEK BAR ================= */
@@ -211,19 +235,16 @@ currentSong.addEventListener("timeupdate", () => {
 const volumeIcon = document.querySelector(".volume img");
 const volumeSlider = document.querySelector(".volume input[type='range']");
 
-// Set slider initial state
 volumeSlider.min = 0;
 volumeSlider.max = 1;
 volumeSlider.step = 0.01;
 volumeSlider.value = lastVolume;
 
-// Slider → change audio volume
 volumeSlider.addEventListener("input", () => {
   const val = parseFloat(volumeSlider.value);
   currentSong.volume = val;
-  lastVolume = val > 0 ? val : lastVolume; // don't overwrite lastVolume with 0
+  lastVolume = val > 0 ? val : lastVolume;
 
-  // sync mute state with slider
   if (val === 0) {
     isMuted = true;
     currentSong.muted = true;
@@ -235,19 +256,16 @@ volumeSlider.addEventListener("input", () => {
   }
 });
 
-// Volume icon click → toggle mute/unmute
 volumeIcon.addEventListener("click", () => {
   if (isMuted) {
-    // Unmute
     isMuted = false;
     currentSong.muted = false;
     currentSong.volume = lastVolume || 0.8;
     volumeSlider.value = currentSong.volume;
     volumeIcon.src = "volume.svg";
   } else {
-    // Mute
     isMuted = true;
-    lastVolume = currentSong.volume; // save current before muting
+    lastVolume = currentSong.volume;
     currentSong.muted = true;
     volumeSlider.value = 0;
     volumeIcon.src = "mute.svg";
@@ -335,3 +353,4 @@ if (backBtn) {
 
 /* ================= INIT ================= */
 loadAlbums();
+// Playbar starts in idle state (class already set in HTML)

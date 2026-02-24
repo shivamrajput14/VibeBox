@@ -251,3 +251,56 @@ margin: 3px;}
 }
 
 
+/* MOBILE ALBUM → SONG VIEW */
+.mobile-back {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  margin: 10px 0;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+
+  /* hide albums when songs are shown */
+  .right.show-songs .cardcontainer {
+    display: none;
+  }
+
+  /* show song list full width */
+  .right.show-songs .songlist {
+    display: block;
+    width: 100%;
+  }
+
+  /* show back button */
+  .right.show-songs .mobile-back {
+    display: block;
+  }
+}
+.mobile-songlist {
+  display: none;
+}
+
+@media (max-width: 900px) {
+
+  .right.show-songs .cardcontainer {
+    display: none;
+  }
+
+  .right.show-songs .mobile-songlist {
+    display: block;
+    padding: 10px;
+  }
+
+  .mobile-songlist li {
+    list-style: none;
+    padding: 10px;
+    border-bottom: 1px solid #222;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+}
