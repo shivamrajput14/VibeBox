@@ -519,19 +519,24 @@ button, .play, .range input[type='range'] { accent-color: var(--main-bg); }
 .playbar.idle .seekbar-fill { display: none; }
 .playbar.idle .circle { display: none; }
 
-/* thumb + songinfo: shown by default, hidden when idle */
-.playbar-thumb { display: block; }
-.songinfo      { display: flex;  }
-.playbar.idle .playbar-thumb { display: none !important; }
-.playbar.idle .songinfo      { display: none !important; }
+/* Idle center message replaces song info */
+.idle-center-msg {
+  display: none;
+  align-items: center; gap: 10px;
+}
+.playbar.idle .idle-center-msg { display: flex; }
+.playbar.idle .song-left .idle-center-msg { display: flex; }
 
-/* idle-placeholder: hidden by default, shown when idle */
+/* Hide song details when idle, show placeholder */
+.playbar.idle .playbar-thumb { display: none !important; }
+.playbar.idle .songinfo { display: none !important; }
+
 .idle-placeholder {
-  display: none !important;
+  display: none;
   align-items: center;
   gap: 10px;
 }
-.playbar.idle .idle-placeholder { display: flex !important; }
+.playbar.idle .idle-placeholder { display: flex; }
 
 .idle-eq {
   display: flex; align-items: flex-end; gap: 2px; height: 20px; flex-shrink: 0;
@@ -658,82 +663,21 @@ button, .play, .range input[type='range'] { accent-color: var(--main-bg); }
   .card { min-height: 300px; }
   .cardcontainer { grid-template-columns: repeat(2,1fr); margin: 10px; max-height: 70vh; }
   .playbar { width: 95vw; left: 50%; transform: translateX(-50%); }
+  .hero-banner .hamburgerContainer { display: flex; }
+  .hero-content { padding-left: 52px; max-width: 80%; }
 }
 
 @media (max-width: 768px) {
-  /* ---- Hero banner ---- */
+  .playbar { bottom: 8px; padding: 8px 14px 10px; border-radius: 16px; width: calc(100% - 16px); }
+  .abovebar { grid-template-columns: 1fr; grid-template-rows: auto auto auto; gap: 6px; }
+  .song-left, .idle-placeholder { justify-content: center; }
+  .songbuttons { justify-content: center; gap: 28px; }
+  .timevol { justify-content: center; }
   .hero-banner { padding: 14px 16px 12px; }
   .hero-heading { font-size: 17px; }
   .hero-waves { right: 14px; height: 36px; opacity: 0.16; }
   .hero-content { max-width: 70%; }
   .n2, .n3 { display: none; }
-
-  /* ---- Playbar: compact single row like Spotify mobile ---- */
-  .playbar {
-    bottom: 10px;
-    padding: 0;
-    border-radius: 14px;
-    width: calc(100% - 24px);
-    overflow: hidden;
-  }
-
-  /* Seekbar full width at top */
-  .seekbar {
-    margin-bottom: 0;
-    border-radius: 0;
-    height: 3px;
-  }
-
-  /* Single row: [song info] [controls] [volume] */
-  .abovebar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    gap: 8px;
-    grid-template-columns: unset;
-    grid-template-rows: unset;
-  }
-
-  /* Left: idle or song info — takes up available space */
-  .song-left {
-    flex: 1;
-    min-width: 0;
-    justify-content: flex-start;
-  }
-  .idle-placeholder { justify-content: flex-start; }
-
-  /* Idle eq bars smaller on mobile */
-  .idle-eq { height: 16px; }
-  .idle-msg-title { font-size: 12px; }
-  .idle-msg-sub { display: none; }
-
-  /* Album thumb smaller */
-  .playbar-thumb { width: 34px; height: 34px; border-radius: 6px; }
-
-  /* Song title/artist compact */
-  .songinfo-title { font-size: 12px; }
-  .songinfo-artist { font-size: 10px; }
-
-  /* Center: just prev/play/next — no padding */
-  .songbuttons {
-    flex-shrink: 0;
-    gap: 16px;
-    justify-content: center;
-  }
-  .songbuttons img[id="prev"],
-  .songbuttons img[id="next"] { width: 20px !important; }
-  .songbuttons img[id="play"] { width: 30px !important; }
-
-  /* Right: hide time, show only volume icon (no slider on mobile) */
-  .timevol {
-    flex-shrink: 0;
-    gap: 6px;
-    justify-content: flex-end;
-  }
-  .songtime { display: none; }
-  .volume input[type="range"] { width: 60px; }
 }
 
 @media (max-width: 600px) { .abovebar { justify-content: center; } }
