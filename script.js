@@ -29,26 +29,26 @@ function setIdle() {
   const pb = document.querySelector(".playbar");
   if (!pb) return;
   pb.classList.add("idle");
-  // CSS handles show/hide via .playbar.idle rules — just remove inline overrides
+  // Show idle placeholder, hide song info + thumb
   const thumb = pb.querySelector(".playbar-thumb");
   const info  = pb.querySelector(".songinfo");
   const idle  = pb.querySelector(".idle-placeholder");
-  if (thumb) thumb.style.removeProperty("display");
-  if (info)  info.style.removeProperty("display");
-  if (idle)  idle.style.removeProperty("display");
+  if (thumb) thumb.style.display = "none";
+  if (info)  info.style.display  = "none";
+  if (idle)  idle.style.display  = "flex";
 }
 
 function setActive() {
   const pb = document.querySelector(".playbar");
   if (!pb) return;
   pb.classList.remove("idle");
-  // CSS handles show/hide — just remove inline overrides
+  // Show song info + thumb, hide idle placeholder
   const thumb = pb.querySelector(".playbar-thumb");
   const info  = pb.querySelector(".songinfo");
   const idle  = pb.querySelector(".idle-placeholder");
-  if (thumb) thumb.style.removeProperty("display");
-  if (info)  info.style.removeProperty("display");
-  if (idle)  idle.style.removeProperty("display");
+  if (thumb) thumb.style.display = "block";
+  if (info)  info.style.display  = "flex";
+  if (idle)  idle.style.display  = "none";
 }
 
 /* ================= LOAD ALBUMS ================= */
@@ -152,10 +152,7 @@ function loadSongs(folder, info) {
     mobileUL.appendChild(liM.firstElementChild);
   });
 
-  // Only update playbar info if nothing is currently playing
-  if (currentSong.paused) {
-    updateSongInfo(0);
-  }
+  updateSongInfo(0);
 
   if (window.innerWidth <= 900) {
     cardcontainer.classList.add("fade-out");
